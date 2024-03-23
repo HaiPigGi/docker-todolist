@@ -1,5 +1,9 @@
+# .gitignore
+
 # Ignore MySQL data directory
-/mysql/
+/mysql/ 
 
 # Ignore vendor directory inside src
 /src/vendor/
+
+/.hidden_files/
