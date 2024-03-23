@@ -1,0 +1,5 @@
+# Ignore MySQL data directory
+/mysql/
+
+# Ignore vendor directory inside src
+/src/vendor/
