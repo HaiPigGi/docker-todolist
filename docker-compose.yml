@@ -1,0 +1,81 @@
+version: '3.8'
+
+networks:
+  laravel:
+  
+services:
+  app:
+    container_name: aplikasi_todo
+    build: .
+    ports:
+      - "8000:80"
+    depends_on:
+      - php                      
+      - db    
+    volumes:
+      - ./src:/var/www/html
+
+  nginx:
+    image: nginx:stable-alpine  
+    container_name: todo_nginx   # Sets the container name    
+    ports:
+      - "8088:80"                # Maps container port 80 to host port 80 (usually for HTTP traffic)
+    volumes:
+      - ./src:/var/www/html      # Mounts the `src` directory from the host to `/var/www/html` (read-only) for static files
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro  # Mounts the `nginx/default.conf` file (read-only) to the correct location
+    depends_on:
+      - php                      
+      - db                 
+    networks:
+      - laravel                  
+
+  db:
+    image: mysql:8.3.0
+    container_name: mysql
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: 'db'
+      MYSQL_USER: 'user'
+      MYSQL_PASSWORD: 'root'
+      MYSQL_ROOT_PASSWORD: 'root'
+    volumes:
+      - ./mysql:/opt/mysql
+    networks:
+      - laravel
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+    networks:
+      - laravel
+
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: php:8.2-fpm
+    container_name: php
+    volumes:
+      - ./src:/var/www/html
+    ports:
+      - "9000:9000"
+    networks:
+      - laravel
+  npm:
+    image: node:20-alpine
+    container_name: npm
+    volumes:
+      - ./src:/var/www/html
+    working_dir: /var/www/html
+    command: npm install
+    depends_on:
+      - php
+    networks:
+      - laravel
