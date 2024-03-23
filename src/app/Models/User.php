@@ -6,10 +6,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-
+use Illuminate\Support\Str;
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
+
+    protected $primaryKey="user_id";
+    public $incrementing=false;
+    protected $keyType = "string";
 
     /**
      * The attributes that are mass assignable.
@@ -18,7 +22,6 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
-        'email',
         'password',
     ];
 
@@ -44,4 +47,19 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    protected static function boot()
+    {
+        parent::boot();
+        //generate uuid for user_id
+        static::creating(function ($user) {
+            $user->user_id=(string) Str::uuid();
+        });    
+} 
+
+        public function todos () {
+            return $this->hasMany(todolist::class);
+        }
+
+
 }
